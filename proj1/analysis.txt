@@ -1,0 +1,31 @@
+// dtruss ./prank +i
+
+dtrace: system integrity protection is on, some features will not be available
+
+SYSCALL(args) 		 = return
+open("/dev/dtracehelper\0", 0x2, 0x7FFF5CB50920)		 = 3 0
+ioctl(0x3, 0x80086804, 0x7FFF5CB508A8)		 = 0 0
+close(0x3)		 = 0 0
+thread_selfid(0x3, 0x80086804, 0x7FFF5CB508A8)		 = 14702 0
+bsdthread_register(0x7FFFE9C341F0, 0x7FFFE9C341E0, 0x2000)		 = 1073741919 0
+ulock_wake(0x1, 0x7FFF5CB4FFCC, 0x0)		 = -1 Err#2
+issetugid(0x1, 0x7FFF5CB4FFCC, 0x0)		 = 0 0
+mprotect(0x1030BA000, 0x88, 0x1)		 = 0 0
+mprotect(0x1030BC000, 0x1000, 0x0)		 = 0 0
+mprotect(0x1030D2000, 0x1000, 0x0)		 = 0 0
+mprotect(0x1030D3000, 0x1000, 0x0)		 = 0 0
+mprotect(0x1030E9000, 0x1000, 0x0)		 = 0 0
+mprotect(0x1030EA000, 0x1000, 0x1)		 = 0 0
+mprotect(0x1030BA000, 0x88, 0x3)		 = 0 0
+mprotect(0x1030BA000, 0x88, 0x1)		 = 0 0
+getpid(0x1030BA000, 0x88, 0x1)		 = 827 0
+stat64("/AppleInternal/XBS/.isChrooted\0", 0x7FFF5CB4FE88, 0x1)		 = -1 Err#2
+stat64("/AppleInternal\0", 0x7FFF5CB4FF20, 0x1)		 = -1 Err#2
+csops(0x33B, 0x7, 0x7FFF5CB4F9B0)		 = -1 Err#22
+dtrace: error on enabled probe ID 2158 (ID 552: syscall::sysctl:return): invalid kernel access in action #10 at DIF offset 40
+csops(0x33B, 0x7, 0x7FFF5CB4F290)		 = -1 Err#22
+sigaction(0xE, 0x7FFF5CB51AF8, 0x7FFF5CB51B20)		 = 0 0
+setitimer(0x0, 0x7FFF5CB51B20, 0x7FFF5CB51B00)		 = 0 0
+sigprocmask(0x0, 0x0, 0x7FFF5CB51B34)		 = 0x0 0
+
+

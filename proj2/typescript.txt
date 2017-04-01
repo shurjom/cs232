@@ -1,0 +1,203 @@
+Script started on Mon 27 Feb 2017 07:59:54 PM EST
+sm47@thompson:~/workspace/cs232/proj2$ ls
+error.txt  grading.txt	names.txt  openComp.sh	output.txt  typescript
+sm47@thompson:~/workspace/cs232/proj2$ sh openComp.sh 
+hollerith
+sm47@hollerith's password: 
+Machine is on.
+Ubuntu is running on hollerith.
+hollerith has users logged in.
+
+sutherland
+sm47@sutherland's password: 
+Machine is on.
+Ubuntu is running on sutherland.
+sutherland has users logged in.
+
+wirth
+sm47@wirth's password: 
+Machine is on.
+Ubuntu is running on wirth.
+wirth has users logged in.
+
+dijkstra
+sm47@dijkstra's password: 
+Machine is on.
+Ubuntu is running on dijkstra.
+dijkstra has users logged in.
+
+wall
+sm47@wall's password: 
+Machine is on.
+Ubuntu is running on wall.
+wall has users logged in.
+
+englebart
+sm47@englebart's password:  
+Machine is on.
+Ubuntu is running on englebart.
+englebart has users logged in.
+
+taylor
+sm47@taylor's password: 
+Machine is on.
+Ubuntu is running on taylor.
+taylor has users logged in.
+
+noyce-kilby
+sm47@noyce-kilby's password: 
+Machine is on.
+Ubuntu is running on noyce-kilby.
+noyce-kilby has users logged in.
+
+church
+sm47@church's password: 
+Machine is on.
+Ubuntu is running on church.
+church has users logged in.
+
+vonneumann
+sm47@vonneumann's password: 
+Machine is on.
+Ubuntu is running on vonneumann.
+vonneumann has users logged in.
+
+kay
+sm47@kay's password: 
+Machine is on.
+Ubuntu is running on kay.
+kay has users logged in.
+
+knuth
+Machine is on.
+Windows is running on knuth.
+
+kernighan
+ sm47@kernighan's password: 
+Machine is on.
+Ubuntu is running on kernighan.
+kernighan has users logged in.
+
+zuse
+sm47@zuse's password: 
+Machine is on.
+Ubuntu is running on zuse.
+zuse has users logged in.
+
+ritchie
+sm47@ritchie's password: 
+Machine is on.
+Ubuntu is running on ritchie.
+ritchie has users logged in.
+
+atanasoff
+sm47@atanasoff's password: 
+Machine is on.
+Ubuntu is running on atanasoff.
+atanasoff has users logged in.
+
+hopper
+Machine is off.
+
+hoare
+sm47@hoare's password: 
+Machine is on.
+Ubuntu is running on hoare.
+hoare has users logged in.
+
+babbage
+sm47@babbage's password: 
+Machine is on.
+Ubuntu is running on babbage.
+babbage has users logged in.
+
+augusta
+sm47@augusta's password: 
+Machine is on.
+Ubuntu is running on augusta.
+augusta has users logged in.
+
+thompson
+sm47@thompson's password: 
+Machine is on.
+Ubuntu is running on thompson.
+thompson has users logged in.
+
+hillis
+sm47@hillis's password: 
+Machine is on.
+Ubuntu is running on hillis.
+hillis has users logged in.
+
+leibniz
+sm47@leibniz's password: 
+Machine is on.
+Ubuntu is running on leibniz.
+leibniz has users logged in.
+
+aiken
+Machine is off.
+
+codd
+sm47@codd's password: 
+Machine is on.
+Ubuntu is running on codd.
+codd has users logged in.
+
+eckert-mauchly
+sm47@eckert-mauchly's password: 
+Machine is on.
+Ubuntu is running on eckert-mauchly.
+eckert-mauchly has users logged in.
+
+stallman
+sm47@stallman's password: 
+Machine is on.
+Ubuntu is running on stallman.
+stallman has users logged in.
+
+wilkes
+sm47@wilkes's password: 
+Machine is on.
+Ubuntu is running on wilkes.
+wilkes has users logged in.
+
+chomsky
+Machine is off.
+
+torvalds
+sm47@torvalds's password: 
+Machine is on.
+Ubuntu is running on torvalds.
+torvalds has users logged in.
+
+goldberg
+sm47@goldberg's password: 
+Machine is on.
+Ubuntu is running on goldberg.
+goldberg has users logged in.
+
+backus-naur
+sm47@backus-naur's password: 
+Machine is on.
+Ubuntu is running on backus-naur.
+backus-naur has users logged in.
+
+stroustrup
+sm47@stroustrup's password: 
+Machine is on.
+Ubuntu is running on stroustrup.
+stroustrup has users logged in.
+
+turing
+Machine is on.
+Windows is running on turing.
+
+boole
+sm47@boole's password: 
+Machine is on.
+Ubuntu is running on boole.
+boole has users logged in.
+sm47@thompson:~/workspace/cs232/proj2$  exit
+
+Script done on Mon 27 Feb 2017 08:04:14 PM EST
