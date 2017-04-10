@@ -1,0 +1,194 @@
+Script started on Wed 05 Apr 2017 06:26:18 PM EDT
+sm47@kay:~/workspace/cs232/proj4$ gcc bakeshop.c -o bakeshop -lpthread
+sm47@kay:~/workspace/cs232/proj4$ ./bakeshop
+
+Store open, oven hot, baker read to bake!
+
+Load 1 is baked and ready to be sold!
+
+Customer 5 is waiting outside store.
+
+Customer 1 is waiting outside store.
+
+Customer 8 is waiting outside store.
+
+Customer 8 has entered the store!
+
+Customer 5 has entered the store!
+
+Customer 7 is waiting outside store.
+
+Customer 6 is waiting outside store.
+
+Customer 6 has entered the store!
+
+Customer 0 is waiting outside store.
+
+Customer 3 is waiting outside store.
+
+Customer 4 is waiting outside store.
+
+Customer 2 is waiting outside store.
+
+Customer 8 has gotten a loaf of bread.
+
+Customer 9 is waiting outside store.
+
+Customer 8 is wating to be checked out! 
+
+Customer 7 has entered the store!
+
+Customer 1 has entered the store!
+
+Customer 8 has paid for the loaf.
+
+Baker printed receipt for customer 8. 
+
+Customer 8 received a receipt
+
+Customer 6 has gotten a loaf of bread.
+
+Customer 6 is wating to be checked out! 
+
+Load 2 is baked and ready to be sold!
+
+Customer 6 has paid for the loaf.
+
+Baker printed receipt for customer 6. 
+
+Customer 6 received a receipt
+
+Load 3 is baked and ready to be sold!
+
+Customer 7 has gotten a loaf of bread.
+
+Customer 7 is wating to be checked out! 
+
+Customer 7 has paid for the loaf.
+
+Baker printed receipt for customer 7. 
+
+Customer 7 received a receipt
+
+Customer 8 has left the store with their bread.
+
+Load 4 is baked and ready to be sold!
+
+Customer 0 has entered the store!
+
+Customer 5 has gotten a loaf of bread.
+
+Customer 5 is wating to be checked out! 
+
+Customer 5 has paid for the loaf.
+
+Baker printed receipt for customer 5. 
+
+Customer 5 received a receipt
+
+Load 5 is baked and ready to be sold!
+
+Customer 1 has gotten a loaf of bread.
+
+Customer 1 is wating to be checked out! 
+
+Customer 1 has paid for the loaf.
+
+Baker printed receipt for customer 1. 
+
+Customer 1 received a receipt
+
+Load 6 is baked and ready to be sold!
+
+Customer 0 has gotten a loaf of bread.
+
+Customer 0 is wating to be checked out! 
+
+Customer 0 has paid for the loaf.
+
+Baker printed receipt for customer 0. 
+
+Customer 0 received a receipt
+
+Customer 5 has left the store with their bread.
+
+Load 7 is baked and ready to be sold!
+
+Customer 3 has entered the store!
+
+Customer 7 has left the store with their bread.
+
+Customer 1 has left the store with their bread.
+
+Customer 4 has entered the store!
+
+Customer 4 has gotten a loaf of bread.
+
+Customer 2 has entered the store!
+
+Customer 4 is wating to be checked out! 
+
+Customer 4 has paid for the loaf.
+
+Baker printed receipt for customer 4. 
+
+Customer 4 received a receipt
+
+Load 8 is baked and ready to be sold!
+
+Customer 3 has gotten a loaf of bread.
+
+Customer 3 is wating to be checked out! 
+
+Customer 3 has paid for the loaf.
+
+Baker printed receipt for customer 3. 
+
+Customer 3 received a receipt
+
+Load 9 is baked and ready to be sold!
+
+Customer 6 has left the store with their bread.
+
+Customer 9 has entered the store!
+
+Customer 9 has gotten a loaf of bread.
+
+Customer 9 is wating to be checked out! 
+
+Customer 9 has paid for the loaf.
+
+Baker printed receipt for customer 9. 
+
+Customer 9 received a receipt
+
+Load 10 is baked and ready to be sold!
+
+Customer 0 has left the store with their bread.
+
+Customer 3 has left the store with their bread.
+
+Customer 2 has gotten a loaf of bread.
+
+Customer 2 is wating to be checked out! 
+
+All loaves of bread have been baked for today!
+
+Customer 2 has paid for the loaf.
+
+Baker printed receipt for customer 2. 
+
+Customer 2 received a receipt
+
+All customers have checkedout and received receipts!
+
+Customer 9 has left the store with their bread.
+
+Customer 4 has left the store with their bread.
+
+Customer 2 has left the store with their bread.
+
+sm47@kay:~/workspace/cs232/proj4$ exit
+exit
+
+Script done on Wed 05 Apr 2017 06:27:08 PM EDT
