@@ -1,0 +1,641 @@
+Script started on Fri 28 Apr 2017 02:11:39 PM EDT
+]0;root@shurjo: /home/shurjo/Desktop/proj5root@shurjo:/home/shurjo/Desktop/proj5# ls
+grading.txt  [0m[01;34mkernelFiles[0m  [01;34mtestFiles[0m  typescript  [01;34musr-include[0m
+]0;root@shurjo: /home/shurjo/Desktop/proj5root@shurjo:/home/shurjo/Desktop/proj5# cd /usr/src/ubuntu-xenial/kernel/
+]0;root@shurjo: /usr/src/ubuntu-xenial/kernelroot@shurjo:/usr/src/ubuntu-xenial/kernel# cat sys.c
+/*
+ *  linux/kernel/sys.c
+ *
+ *  Copyright (C) 1991, 1992  Linus Torvalds
+ */
+
+#include <linux/export.h>
+#include <linux/mm.h>
+#include <linux/utsname.h>
+#include <linux/mman.h>
+#include <linux/reboot.h>
+#include <linux/prctl.h>
+#include <linux/highuid.h>
+#include <linux/fs.h>
+#include <linux/kmod.h>
+#include <linux/perf_event.h>
+#include <linux/resource.h>
+#include <linux/kernel.h>
+#include <linux/workqueue.h>
+#include <linux/capability.h>
+#include <linux/device.h>
+#include <linux/key.h>
+#include <linux/times.h>
+#include <linux/posix-timers.h>
+#include <linux/security.h>
+#include <linux/dcookies.h>
+#include <linux/suspend.h>
+#include <linux/tty.h>=
+#include <linux/signal.h>
+#include <linux/cn_proc.h>
+#include <linux/getcpu.h>
+#include <linux/task_io_accounting_ops.h>
+#include <linux/seccomp.h>
+#include <linux/cpu.h>
+#include <linux/personality.h>
+#include <linux/ptrace.h>
+#include <linux/fs_struct.h>
+#include <linux/file.h>
+#include <linux/mount.h>
+#include <linux/gfp.h>
+#include <linux/syscore_ops.h>
+#include <linux/version.h>
+#include <linux/ctype.h>
+
+#include <linux/compat.h>
+#include <linux/syscalls.h>
+#include <linux/kprobes.h>
+#include <linux/user_namespace.h>
+#include <linux/binfmts.h>
+
+#include <linux/sched.h>
+#include <linux/rcupdate.h>
+#include <linux/uidgid.h>
+#include <linux/cred.h>
+
+#include <linux/kmsg_dump.h>
+/* Move somewhere else to avoid recompiling? */
+#include <generated/utsrelease.h>
+
+#include <asm/uaccess.h>
+#include <asm/io.h>
+#include <asm/unistd.h>
+
+#ifndef SET_UNALIGN_CTL
+# define SET_UNALIGN_CTL(a, b)	(-EINVAL)
+#endif
+#ifndef GET_UNALIGN_CTL
+# define GET_UNALIGN_CTL(a, b)	(-EINVAL)
+#endif
+#ifndef SET_FPEMU_CTL
+# define SET_FPEMU_CTL(a, b)	(-EINVAL)
+#endif
+#ifndef GET_FPEMU_CTL
+# define GET_FPEMU_CTL(a, b)	(-EINVAL)
+#endif
+#ifndef SET_FPEXC_CTL
+# define SET_FPEXC_CTL(a, b)	(-EINVAL)
+#endif
+#ifndef GET_FPEXC_CTL
+# define GET_FPEXC_CTL(a, b)	(-EINVAL)
+#endif
+#ifndef GET_ENDIAN
+# define GET_ENDIAN(a, b)	(-EINVAL)
+#endif
+#ifndef SET_ENDIAN
+# define SET_ENDIAN(a, b)	(-EINVAL)
+#endif
+#ifndef GET_TSC_CTL
+# define GET_TSC_CTL(a)		(-EINVAL)
+#endif
+#ifndef SET_TSC_CTL
+# define SET_TSC_CTL(a)		(-EINVAL)
+#endif
+#ifndef MPX_ENABLE_MANAGEMENT
+# define MPX_ENABLE_MANAGEMENT()	(-EINVAL)
+#endif
+#ifndef MPX_DISABLE_MANAGEMENT
+# define MPX_DISABLE_MANAGEMENT()	(-EINVAL)
+#endif
+#ifndef GET_FP_MODE
+# define GET_FP_MODE(a)		(-EINVAL)
+#endif
+#ifndef SET_FP_MODE
+# define SET_FP_MODE(a,b)	(-EINVAL)
+#endif
+
+/**********************************************************************
+LOTS OF STUFF CUT OUT OF THE FILE.
+***********************************************************************/ 
+/*
+ * this is where the system-wide overflow UID and GID are defined, for
+ * architectures that now have 32-bit UID/GID but didn't in the past
+ */
+
+int overflowuid = DEFAULT_OVERFLOWUID;
+int overflowgid = DEFAULT_OVERFLOWGID;
+
+
+/*
+ * set the priority of a task
+ * - the caller must hold the RCU read lock
+ */
+static int set_one_prio(struct task_struct *p, int niceval, int error)
+{
+	int no_nice;
+
+	if (!set_one_prio_perm(p)) {
+		error = -EPERM;
+		goto out;
+	}
+	if (niceval < task_nice(p) && !can_nice(p, niceval)) {
+		error = -EACCES;
+		goto out;
+	}
+	no_nice = security_task_setnice(p, niceval);
+	if (no_nice) {
+		error = no_nice;
+		goto out;
+	}
+	if (error == -ESRCH)
+		error = 0;
+	set_user_nice(p, niceval);
+out:
+	return error;
+}
+/* Written by: Shurjo Maitra (sm47)
+ * Date: April 28, 2017
+ * Using printk, print out team name to kernel log
+ */
+
+SYSCALL_DEFINE0(printteamname)
+{
+	printk("Shurjo");
+	return 0;
+}
+
+/* Written by: Shurjo Maitra (sm47)
+ * Date: April 28, 2017
+ * Gets process info and then recurseively iterates through its child 
+ * processes. 
+ * @param: task struct root_ptr, task array, int level
+ * @return: process count, branches in tree
+ */
+
+int do_tasktree( struct task_struct * root_ptr, struct taskinfo __user * task_array, int nr, int level ) {
+	
+	//Declare structures to pointers below
+ 	struct list_head * list;
+ 	struct task_struct * child;
+
+	//Return null if process number less than 
+ 	if ( nr <= 0 ) {
+    	return 0;
+ 	}
+
+	//Find all the branches of task tree and assign them to pid
+	task_array[0].pid = root_ptr->pid; 
+	//Parent process id
+	task_array[0].parent_pid = root_ptr->parent->pid; 
+	//state of process from task 
+	task_array[0].state = root_ptr->state;		
+	//level or process from task
+  	task_array[0].level = level;		
+  	//initiaize first child as 0 index
+ 	task_array[0].first_child_pid = 0;
+ 	//user id from task array to value
+ 	task_array[0].uid = root_ptr->cred->uid.val;		
+
+	//Find command size or default to max value of 63
+	int comm_size;
+	if (sizeof(root_ptr->comm) > 63) {
+		comm_size = sizeof(root_ptr -> comm);
+	} 
+	else {
+		comm_size = 63;
+	}
+	
+	//Itereate through main command and copy to taskinfo
+	int i;
+  	for( i = 0; i < comm_size; i++ ){
+		task_array[0].comm[i] = root_ptr->comm[i];  
+	}
+	
+	//Initialize loop variables
+	int child_count = 1;
+	int tmp;
+  
+	//Iterate trough branch children processes 
+  	list_for_each(list, &root_ptr->children) {
+    		child = list_entry(list, struct task_struct, sibling);
+
+		//First child process is detected
+   	 	if(child_count==1){
+      		task_array[0].first_child_pid = child->pid;
+    	}
+
+		//Iterate through each child process recursively
+    	tmp = do_tasktree(child, &task_arrayhild_count], nr - child_count, level + 1);
+		
+		//If there are no more child processes stop the loop
+		if(tmp == 0){
+      		break;
+    	}
+		//Increment child_count with number of descendants already done
+    	child_count += tmp;
+  	}
+	return child_count;
+}
+
+/* Written by: Shurjo Maitra (sm47)
+ * Date: April 28, 2017
+ * Initialize variables, check for bad args and then call do_tasktree function
+ * @param: task info, info buf, int nr, int rootpid
+ * @return: related process count 
+ */
+
+SYSCALL_DEFINE3( tasktree, struct taskinfo __user *, buf, int, nr, int, rootpid){
+	
+	//Initialize starting task structure and array
+	struct task_struct * root;
+	struct taskinfo * task_array;
+	
+	//Check if buffer is empty, otherwise declare parameter check
+  	if(buf == NULL || nr < 0){
+		return -EINVAL;
+	} else {
+		printk("Function tasktree() passed parameter checks");
+	}
+	
+	//Lock read access to task struct
+	read_lock(&tasklist_lock);
+
+	//Find the task structure using the root pid
+	root = find_task_by_vpid(rootpid);
+
+	//Allocate memory for array of size equal to taskinfo
+	task_array = kmalloc( nr * sizeof( struct taskinfo), GFP_KERNEL );
+
+	//Initialized count and iterates through processes recursively,
+	// if struct is writable then write out the buffer otherwise return error
+	int process_count =  do_tasktree( root, task_array, nr, 0 );
+	if (!access_ok(VERIFY_WRITE, buf, sizeof(struct taskinfo))){
+		 return -EFAULT;
+	}
+
+	//Copy buffer to the task array of size from taskinfo
+ 	copy_to_user( buf, task_array, nr * sizeof( struct taskinfo) );
+
+	//Unlock read access to the task struct
+	read_unlock(&tasklist_lock); 
+	
+	//Return task array space to kernel and output the process count
+	kfree(task_array);
+	return process_count;
+}
+
+
+SYSCALL_DEFINE3(setpriority, int, which, int, who, int, niceval)
+{
+	struct task_struct *g, *p;
+	struct user_struct *user;
+	const struct cred *cred = current_cred();
+	int error = -EINVAL;
+	struct pid *pgrp;
+	kuid_t uid;
+
+	if (which > PRIO_USER || which < PRIO_PROCESS)
+		goto out;
+
+	/* normalize: avoid signed division (rounding problems) */
+	error = -ESRCH;
+	if (niceval < MIN_NICE)
+		niceval = MIN_NICE;
+	if (niceval > MAX_NICE)
+		niceval = MAX_NICE;
+
+	rcu_read_lock();
+	read_lock(&tasklist_lock);
+	switch (which) {
+	case PRIO_PROCESS:
+		if (who)
+			p = find_task_by_vpid(who);
+		else
+			p = current;
+		if (p)
+			error = set_one_prio(p, niceval, error);
+		break;
+	case PRIO_PGRP:
+		if (who)
+			pgrp = find_vpid(who);
+		else
+			pgrp = task_pgrp(current);
+		do_each_pid_thread(pgrp, PIDTYPE_PGID, p) {
+			error = set_one_prio(p, niceval, error);
+		} while_each_pid_thread(pgrp, PIDTYPE_PGID, p);
+		break;
+	case PRIO_USER:
+		uid = make_kuid(cred->user_ns, who);
+		user = cred->user;
+		if (!who)
+			uid = cred->uid;
+		else if (!uid_eq(uid, cred->uid)) {
+			user = find_user(uid);
+			if (!user)
+				goto out_unlock;	/* No processes for this user */
+		}
+		do_each_thread(g, p) {
+			if (uid_eq(task_uid(p), uid) && task_pid_vnr(p))
+				error = set_one_prio(p, niceval, error);
+		} while_each_thread(g, p);
+		if (!uid_eq(uid, cred->uid))
+			free_uid(user);		/* For find_user() */
+		break;
+	}
+out_unlock:
+	read_unlock(&tasklist_lock);
+	rcu_read_unlock();
+out:
+	return error;
+}
+
+/**********************************************************************
+LOTS OF STUFF CUT OUT OF THE FILE.
+***********************************************************************/ 
+
+	if (!access_ok(VERIFY_WRITE, info, sizeof(struct compat_sysinfo)) ||
+	    __put_user(s.uptime, &info->uptime) ||
+	    __put_user(s.loads[0], &info->loads[0]) ||
+	    __put_user(s.loads[1], &info->loads[1]) ||
+	    __put_user(s.loads[2], &info->loads[2]) ||
+	    __put_user(s.totalram, &info->totalram) ||
+	    __put_user(s.freeram, &info->freeram) ||
+	    __put_user(s.sharedram, &info->sharedram) ||
+	    __put_user(s.bufferram, &info->bufferram) ||
+	    __put_user(s.totalswap, &info->totalswap) ||
+	    __put_user(s.freeswap, &info->freeswap) ||
+	    __put_user(s.procs, &info->procs) ||
+	    __put_user(s.totalhigh, &info->totalhigh) ||
+	    __put_user(s.freehigh, &info->freehigh) ||
+	    __put_user(s.mem_unit, &info->mem_unit))
+		return -EFAULT;
+
+	return 0;
+}
+#endif /* CONFIG_COMPAT */
+
+]0;root@shurjo: /usr/src/ubuntu-xenial/kernelroot@shurjo:/usr/src/ubuntu-xenial/kernel# cd /usr/src/ubuntu-xenial/arch/x86/entry/syscalls
+]0;root@shurjo: /usr/src/ubuntu-xenial/arch/x86/entry/syscallsroot@shurjo:/usr/src/ubuntu-xenial/arch/x86/entry/syscalls# cat syscall_64.tbl
+#
+# 64-bit system call numbers and entry vectors
+#
+# The format is:
+# <number> <abi> <name> <entry point>
+#
+# The abi is "common", "64" or "x32" for this file.
+#
+0	common	read			sys_read
+1	common	write			sys_write
+
+/**********************************************************************
+LOTS OF STUFF CUT OUT OF THE FILE.
+***********************************************************************/
+
+323	common	userfaultfd		sys_userfaultfd
+324	common	membarrier		sys_membarrier
+325	common	mlock2			sys_mlock2
+326	common	printteamname	sys_printteamname
+327	common	tasktree		sys_tasktree
+
+#
+# x32-specific system call numbers start at 512 to avoid cache impact
+# for native 64-bit operation.
+#
+
+/**********************************************************************
+LOTS OF STUFF CUT OUT OF THE FILE.
+***********************************************************************/
+
+543	x32	io_setup		compat_sys_io_setup
+544	x32	io_submit		compat_sys_io_submit
+545	x32	execveat		stub_x32_execveat
+
+]0;root@shurjo: /usr/src/ubuntu-xenial/arch/x86/entry/syscallsroot@shurjo:/usr/src/ubuntu-xenial/arch/x86/entry/syscalls# cd /usr/src/ubuntu-xeenial/include/linux/
+]0;root@shurjo: /usr/src/ubuntu-xenial/include/linuxroot@shurjo:/usr/src/ubuntu-xenial/include/linux# cat syscalls.h
+/*
+ * syscalls.h - Linux syscall interfaces (non-arch-specific)
+ *
+ * Copyright (c) 2004 Randy Dunlap
+ * Copyright (c) 2004 Open Source Development Labs
+ *
+ * This file is released under the GPLv2.
+ * See the file COPYING for more details.
+ */
+
+#ifndef _LINUX_SYSCALLS_H
+#define _LINUX_SYSCALLS_H
+
+struct epoll_event;
+struct iattr;
+struct inode;
+struct iocb;
+struct io_event;
+
+/**********************************************************************
+LOTS OF STUFF CUT OUT OF THE FILE.
+***********************************************************************/
+
+asmlinkage long sys_times(struct tms __user *tbuf);
+
+/********/
+/*proj5 required structures*/
+asmlinkage long sys_printteamname(void);
+asmlinkage long sys_tasktree(struct taskinfo __user *arg, int nr, int rootpid);
+/********/
+
+asmlinkage long sys_gettid(void);
+asmlinkage long sys_nanosleep(struct timespec __user *rqtp, struct timespec __user *rmtp);
+asmlinkage long sys_alarm(unsigned int seconds);
+
+/**********************************************************************
+LOTS OF STUFF CUT OUT OF THE FILE.
+***********************************************************************/
+asmlinkage long sys_mlock2(unsigned long start, size_t len, int flags);
+
+#endif
+]0;root@shurjo: /usr/src/ubuntu-xenial/include/linuxroot@shurjo:/usr/src/ubuntu-xenial/include/linux# cd /usr/include
+]0;root@shurjo: /usr/includeroot@shurjo:/usr/include# cat taskinfo.h 
+#include <unistd.h>
+#include <sys/types.h>
+struct taskinfo {
+ 	pid_t pid;                  /* process id */
+ 	pid_t parent_pid;           /* process id of parent */
+ 	pid_t first_child_pid;      /* pid of youngest child */
+ 	long state;                 /* current state of process */
+ 	long uid;                   /* user id of process owner */
+ 	char comm[64];              /* name of program executed */ 
+ 	int level;                  /* the output indentation level */
+};
+
+
+]0;root@shurjo: /usr/includeroot@shurjo:/usr/include# cd usr/src/ub/usr/src/ubuntu-xenial/include//linux/ 
+]0;root@shurjo: /usr/src/ubuntu-xenial/include/linuxroot@shurjo:/usr/src/ubuntu-xenial/include/linux# cat taskinfo.h
+struct taskinfo {
+ 	pid_t pid;                  /* process id */
+ 	pid_t parent_pid;           /* process id of parent */
+ 	pid_t first_child_pid;      /* pid of youngest child */
+ 	long state;                 /* current state of process */
+ 	long uid;                   /* user id of process owner */
+ 	char comm[64];              /* name of program executed */ 
+ 	int level;                  /* the output indentation level */
+
+};]0;root@shurjo: /usr/src/ubuntu-xenial/include/linuxroot@shurjo:/usr/src/ubuntu-xenial/include/linux# cat taskinfo.h cd /usr/src/ubuntu-xenial//ursr/home/shurjo/Desktop/proj5/ 
+
+]0;root@shurjo: /usr/src/ubuntu-xenial/include/linuxroot@shurjo:/usr/src/ubuntu-xenial/include/linux# cd /home/shurjo/Desktop/proj5//testFilles/
+]0;root@shurjo: /home/shurjo/Desktop/proj5/testFilesroot@shurjo:/home/shurjo/Desktop/proj5/testFiles# cat tasktreeTest.c 
+/*
+ *Created by: Shurjo Maitra (sm47)
+ *Date: 4/27/17
+ *Runs tasktree system call in kernel
+ */
+#include <tasktree.h>
+#include <taskinfo.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(void) {
+	// Structure taskinfo is put put into process pointer
+	struct taskinfo *processes;
+		
+	//Number of initial processes to analyze 
+	int nr = 100;
+	
+	//Allocate memory 
+	processes = malloc(nr*sizeof(struct taskinfo));
+			
+	//r
+	int num = syscall(327, processes, nr, 2);
+		
+	printf("Number of related processes found: %i\n", num);
+
+	//Initialize loop variables 
+	int i;
+	int j;
+	//Iterate through nr number of processes and find taskinfo details and output them
+	for ( i = 0; i < nr; i++ )
+	{  
+		for( j = 0; j < processes[i].level; j++ ) {
+			printf( "\t" ) ; 
+		}
+		printf( "pid %i, parent_pid %i, first_child %i, state %lu, uid %lu name %s\n", processes[i].pid, processes[i].parent_pid, processes[i].first_child_pid, processes[i].state, processes[i].uid, processes[i].comm);
+	}
+	//Release memory held by process malloc 
+	free(processes);
+	return 0;
+}
+]0;root@shurjo: /home/shurjo/Desktop/proj5/testFilesroot@shurjo:/home/shurjo/Desktop/proj5/testFiles# cat teprintteamnameTest.c 
+/*
+ *Created by: Shurjo Maitra (sm47)
+ *Date: 4/27/17
+ *Runs teamname function in kernel
+ */
+#include <printteamname.h>
+#include <stdio.h>
+
+int main(void) {
+	PRINTTEAMNAME;
+	perror("FAILURE");
+}]0;root@shurjo: /home/shurjo/Desktop/proj5/testFilesroot@shurjo:/home/shurjo/Desktop/proj5/testFiles# gcc trtasktreeTest.c -o main
+]0;root@shurjo: /home/shurjo/Desktop/proj5/testFilesroot@shurjo:/home/shurjo/Desktop/proj5/testFiles# ./main
+Number of related processes found: -1
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+pid 0, parent_pid 0, first_child 0, state 0, uid 0 name 
+]0;root@shurjo: /home/shurjo/Desktop/proj5/testFilesroot@shurjo:/home/shurjo/Desktop/proj5/testFiles# exit
+exit
+
+/* GRADER => my kernel was not compiling correctly, I tried both on my laptop and school workstation. If I can fix it I will reupload typescript. Thanks! */
+
+Script done on Fri 28 Apr 2017 02:20:29 PM EDT

@@ -1,0 +1,42 @@
+
+We the undersigned affirm that (i) the attached project is the work of ourselves 
+and no one else, and (ii) the "fair share percentage" accurately reflects 
+the percentage of a fair share that each person contributed to the project. 
+(If each person did their fair share, use 100%.) 
+
+
+
+NAME: Shurjo Maitra         FAIR SHARE PERCENTAGE (0 - 100):  100
+NAME:                       FAIR SHARE PERCENTAGE (0 - 100):  
+NAME:                       FAIR SHARE PERCENTAGE (0 - 100):
+
+
+Category                    Points Possible      Points Earned
+System Call                 70
+	  
+Test Program                10 
+Style/Documentation         20                
+
+Total                       100
+
+PERSON1 SCORE (Total * FSP): 
+PERSON2 SCORE (Total * FSP): 
+PERSON3 SCORE (Total * FSP):
+
+Grader comments:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
